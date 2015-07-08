@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    neo4j-core (0.0.1)
+    record_linkage (0.0.1)
       fuzzy-string-match
 
 GEM
@@ -121,9 +121,9 @@ DEPENDENCIES
   guard
   guard-rspec
   guard-rubocop
-  neo4j-core!
   pry
   rake
+  record_linkage!
   rspec
   rspec-its
   rubocop
