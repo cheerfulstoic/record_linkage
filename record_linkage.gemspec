@@ -4,7 +4,7 @@ $LOAD_PATH.unshift lib unless $LOAD_PATH.include?(lib)
 require 'record_linkage/version'
 
 Gem::Specification.new do |s|
-  s.name     = 'neo4j-core'
+  s.name     = 'record_linkage'
   s.version  = RecordLinkage::VERSION
   s.required_ruby_version = '>= 1.9.3'
 
