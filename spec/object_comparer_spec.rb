@@ -20,55 +20,91 @@ module RecordLinkage
     end
 
     describe '#classify_hash' do
-      let(:attributes1) { {} }
-      let(:attributes2) { {} }
-      let(:object1) { OpenStruct.new(attributes1) }
-      let(:object2) { OpenStruct.new(attributes2) }
+      let(:object1) { OpenStruct.new(name: name) }
+      let(:object2) { OpenStruct.new(forename: forename) }
+      let(:matcher_arguments) { [[:name, :forename, matcher_definition]] }
 
-      context 'a fuzzy string match' do
-        let(:matcher_arguments) { [[:name, :display_name, :fuzzy_string]] }
+      subject { comparer.classify_hash(object1, object2)[[:name, :forename]] }
 
-        subject { comparer.classify_hash(object1, object2)[[:name, :display_name]] }
+      let_context matcher_definition: :fuzzy_string do
+        let_context 'a perfect match', name: 'Brian', forename: 'Brian' do
+          it { should == 1.0 }
 
-        context 'a perfect match' do
-          let(:attributes1) { {name: 'Brian'} }
-          let(:attributes2) { {display_name: 'Brian'} }
-
-          it 'returns 1.0' do
-            expect(subject).to eq(1.0)
+          let_context default_weight: 2.2 do
+            it { should == 2.2 }
           end
+        end
 
-          context 'weight == 2.2' do
-            let(:default_weight) { 2.2 }
+        let_context 'a perfect mismatch', name: '1', forename: '2' do
+          it { should == 0.0 }
+        end
 
-            it 'returns 2.2' do
-              expect(subject).to eq(2.2)
+        let_context 'a partial match', name: 'Brian', forename: 'Briau' do
+          it { should == 0.92 }
+
+          let_context default_weight: 1.5 do
+            it { should be_within(0.01).of(1.38) }
+          end
+        end
+      end
+
+      let_context matcher_definition: :exact_string do
+        let_context 'a perfect match', name: 'Brian', forename: 'Brian' do
+          it { should == 1.0 }
+
+          let_context default_weight: 2.2 do
+            it { should == 2.2 }
+          end
+        end
+
+        let_context 'a perfect mismatch', name: '1', forename: '2' do
+          it { should == 0.0 }
+        end
+
+        let_context 'a partial match', name: 'Brian', forename: 'Briau' do
+          it { should == 0.0 }
+
+          let_context default_weight: 1.5 do
+            it { should == 0.0 }
+          end
+        end
+      end
+
+      let_context matcher_definition: :array_fuzzy_string do
+        let_context name: %w(Brian) do
+          let_context 'a perfect match', forename: %w(Brian) do
+            it { should == 1.0 }
+
+            let_context default_weight: 2.2 do
+              it { should == 2.2 }
             end
           end
-        end
 
-        context 'a perfect mismatch' do
-          let(:attributes1) { {name: '1'} }
-          let(:attributes2) { {display_name: '2'} }
-
-          it 'returns 0.0' do
-            expect(subject).to eq(0.0)
-          end
-        end
-
-        context 'a partial match' do
-          let(:attributes1) { {name: 'Brian'} }
-          let(:attributes2) { {display_name: 'Briau'} }
-
-          it 'returns 0.92' do
-            expect(subject).to eq(0.92)
+          let_context 'a perfect mismatch', forename: %w(Csjbo) do
+            it { should == 0.0 }
           end
 
-          context 'weight == 1.5' do
-            let(:default_weight) { 1.5 }
+          let_context 'a partial match', forename: %w(Briau) do
+            it { should == 0.92 }
 
-            it 'returns 1.38' do
-              expect(subject).to be_within(0.01).of(1.38)
+            let_context default_weight: 1.5 do
+              it { should be_within(0.01).of(1.38) }
+            end
+          end
+
+          let_context forename: %w(Brian Briau) do
+            it { should == 1.92 }
+
+            let_context default_weight: 1.5 do
+              it { should == 2.88 }
+            end
+          end
+
+          let_context forename: %w(Brian Csjbo) do
+            it { should == 1.0 }
+
+            let_context default_weight: 1.5 do
+              it { should == 1.5 }
             end
           end
         end
