@@ -40,7 +40,7 @@ module RecordLinkage
             array2.map do |value2|
               send(single_matcher, value1, value2, options)
             end
-          end.flatten.sum
+          end.flatten.inject(:+)
         end
       end
 
