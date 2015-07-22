@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    record_linkage (0.0.1)
+    record_linkage (0.0.2)
       fuzzy-string-match
 
 GEM
